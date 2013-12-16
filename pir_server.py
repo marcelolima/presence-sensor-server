@@ -43,8 +43,8 @@ def connection_handler(payload, cliaddr):
 	print "Server: Connected by " + str(cliaddr[:2])
 	
 	# Check if the payload content matches a valid MAC address #
-	if not match("^([0-9A-F]{2}[-:]){5}[0-9A-F]{2}$", 
-		payload.upper()):
+	#if not match("^([0-9A-F]{2}[-:]){5}[0-9A-F]{2}$", payload.upper()):
+	if not match("^([0-9A-F]){6}$", payload.upper()):
 		print ("Received invalid mac-address: \""+ str(payload) + 
 			"\" , from sensor " + str(cliaddr[:2]))
 		return None
