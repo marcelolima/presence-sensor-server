@@ -3,8 +3,10 @@ from threading import Thread
 from sqlite3 import connect, Error
 from sys import exit, argv
 from re import match
+from struct import unpack
 
 PAYLOAD_LEN	= 17
+IFACE = argv[3]
 
 def db_init():
 	try:
@@ -37,24 +39,11 @@ def db_insert(data):
 
 	con_db.close()
 
-def connection_handler(payload, cliaddr):
-	print "Server: Connected by " + str(cliaddr[:2])
-	
-	# Check if the payload content matches a valid MAC address #
-	#if not match("^([0-9A-F]{2}[-:]){5}[0-9A-F]{2}$", payload.upper()):
-	if not match("^([0-9A-F]){6}$", payload.upper()):
-		print ("Received invalid mac-address: \""+ str(payload) + 
-			"\" , from sensor " + str(cliaddr[:2]))
-		return None
-
-	print "Received \"" + str(payload) + "\" from " + str(cliaddr)
-	db_insert(payload)
-
 def server_init(sockaddr):
-	print "Trying to create sock binded to " + str(sockaddr)
 	try:
 		sk = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
 		sk.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		sk.setsockopt(socket.SOL_SOCKET, 25, 'bt0')
 		sk.bind(sockaddr)
 	except socket.error, e:
 		if sk:
@@ -74,9 +63,11 @@ def server_init(sockaddr):
 			print "Recvfrom error: " + str(e)
 			sk.close()
 			exit(1)
-		
-		t = Thread(target = connection_handler,
-			args =(payload, cliaddr,))
+	
+	        print "Received \"" + payload + "\" from " + str(cliaddr)
+	
+		t = Thread(target = db_insert,
+			args =(payload,))
 		t.start()
 
 if __name__ == '__main__':
@@ -84,10 +75,13 @@ if __name__ == '__main__':
 		raise Exception("Socket error: IPV6 Address not configured")
 		exit(1)
 	
-	if len(argv) != 3:
-		print "Usage: pir_server [IPv6] [PORT]"
+	if len(argv) != 4:
+		print "Usage: pir_server [IPv6] [PORT] [IFACE]"
 		exit(1)
 	
-	sockaddr = (argv[1], int(argv[2]), 0, 2)
+	LOCAL_ADDR6 = argv[1]
+	LOCAL_PORT = int(argv[2])
+	
+	sockaddr = (LOCAL_ADDR6, LOCAL_PORT)
 	t = Thread(target=server_init, args=(sockaddr,))
 	t.start()
