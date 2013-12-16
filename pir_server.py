@@ -1,11 +1,9 @@
 import socket
 from threading import Thread
 from sqlite3 import connect, Error
-from sys import exit
+from sys import exit, argv
 from re import match
 
-LOCAL_ADDR6	= 'fe80::7271:bcff:fe19:13c2'
-LOCAL_PORT	= 40000
 PAYLOAD_LEN	= 17
 
 def db_init():
@@ -53,6 +51,7 @@ def connection_handler(payload, cliaddr):
 	db_insert(payload)
 
 def server_init(sockaddr):
+	print "Trying to create sock binded to " + str(sockaddr)
 	try:
 		sk = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
 		sk.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -84,7 +83,11 @@ if __name__ == '__main__':
 	if not socket.has_ipv6:
 		raise Exception("Socket error: IPV6 Address not configured")
 		exit(1)
-
-	sockaddr = (LOCAL_ADDR6, LOCAL_PORT, 0, 2)
+	
+	if len(argv) != 3:
+		print "Usage: pir_server [IPv6] [PORT]"
+		exit(1)
+	
+	sockaddr = (argv[1], int(argv[2]), 0, 2)
 	t = Thread(target=server_init, args=(sockaddr,))
 	t.start()
