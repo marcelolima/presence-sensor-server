@@ -6,7 +6,7 @@ from re import match
 from struct import unpack
 
 PAYLOAD_LEN	= 17
-IFACE = argv[3]
+LOCAL_PORT	= 40000
 
 def db_init():
 	try:
@@ -43,7 +43,6 @@ def server_init(sockaddr):
 	try:
 		sk = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
 		sk.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		sk.setsockopt(socket.SOL_SOCKET, 25, 'bt0')
 		sk.bind(sockaddr)
 	except socket.error, e:
 		if sk:
@@ -75,13 +74,6 @@ if __name__ == '__main__':
 		raise Exception("Socket error: IPV6 Address not configured")
 		exit(1)
 	
-	if len(argv) != 4:
-		print "Usage: pir_server [IPv6] [PORT] [IFACE]"
-		exit(1)
-	
-	LOCAL_ADDR6 = argv[1]
-	LOCAL_PORT = int(argv[2])
-	
-	sockaddr = (LOCAL_ADDR6, LOCAL_PORT)
+	sockaddr = ('', LOCAL_PORT)
 	t = Thread(target=server_init, args=(sockaddr,))
 	t.start()
