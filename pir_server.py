@@ -22,16 +22,16 @@ def db_init():
 		exit(1)
 
 	finally:
-		if con_db: 
+		if con_db:
  			con_db.close()
 
 def db_insert(data):
 	try:
 		con_db = connect('presence.db')
 		cur = con_db.cursor()
-		cur.execute("INSERT INTO pir_reads(id_sensor, time) VALUES(\"" + 
+		cur.execute("INSERT INTO pir_reads(id_sensor, time) VALUES(\"" +
 			str(data) + "\", strftime('%d-%m-%Y %H:%M:%S', "       +
-				"'now','localtime'))") 
+				"'now','localtime'))")
 		con_db.commit()
 	except Error, e:
 		con_db.rollback()
@@ -49,7 +49,7 @@ def server_init(sockaddr):
 			sk.close()
 		print "Socket error: " + str(e)
 		exit(1)
-	
+
 	db_init()
 
 	print ("Server listening on addr: " + str(sockaddr[0]) + " port: " +
@@ -62,9 +62,9 @@ def server_init(sockaddr):
 			print "Recvfrom error: " + str(e)
 			sk.close()
 			exit(1)
-	
+
 	        print "Received \"" + payload + "\" from " + str(cliaddr)
-	
+
 		t = Thread(target = db_insert,
 			args =(payload,))
 		t.start()
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 	if not socket.has_ipv6:
 		raise Exception("Socket error: IPV6 Address not configured")
 		exit(1)
-	
+
 	sockaddr = ('', LOCAL_PORT)
 	t = Thread(target=server_init, args=(sockaddr,))
 	t.start()

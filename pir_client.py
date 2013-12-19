@@ -7,7 +7,7 @@ def client_test(sockaddr, payload):
 	except socket.error, e:
 		print "Socket error: " + str(e)
 		exit(1)
-	
+
 	try:
 		sk.sendto(payload, (sockaddr[0], sockaddr[1]))
 	except socket.error, e:
@@ -22,7 +22,7 @@ if __name__ == '__main__':
 	if not socket.has_ipv6:
 		raise Exception("Socket error: IPV6 Address not configured")
 		exit(1)
-	
+
 	remote_ipaddr6 = argv[1]
 	remote_port = int(argv[2])
 	local_mac = argv[3]
