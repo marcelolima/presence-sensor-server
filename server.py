@@ -2,17 +2,15 @@ import socket
 from threading import Thread
 from sqlite3 import connect, Error
 from sys import exit, argv
-from re import match
-from struct import unpack
 
-PAYLOAD_LEN	= 17
+PAYLOAD_LEN	= 33
 LOCAL_PORT	= 40000
 
 def db_init():
 	try:
-		con_db = connect('presence.db')
+		con_db = connect('sensor_reads.db')
 		cur = con_db.cursor()
-		cur.execute("CREATE TABLE IF NOT EXISTS pir_reads(id INTEGER \
+		cur.execute("CREATE TABLE IF NOT EXISTS sensor_reads(id INTEGER \
 			PRIMARY" + " KEY AUTOINCREMENT, id_sensor TEXT       \
 			NOT NULL, time TEXT)")
 		con_db.commit()
@@ -27,9 +25,9 @@ def db_init():
 
 def db_insert(data):
 	try:
-		con_db = connect('presence.db')
+		con_db = connect('sensor_reads.db')
 		cur = con_db.cursor()
-		cur.execute("INSERT INTO pir_reads(id_sensor, time) VALUES(\"" +
+		cur.execute("INSERT INTO sensor_reads(id_sensor, time) VALUES(\"" +
 			str(data) + "\", strftime('%d-%m-%Y %H:%M:%S', "       +
 				"'now','localtime'))")
 		con_db.commit()
@@ -63,6 +61,7 @@ def server_init(sockaddr):
 			sk.close()
 			exit(1)
 
+		payload = payload.split("\0")[0]
 	        print "Received \"" + payload + "\" from " + str(cliaddr)
 
 		t = Thread(target = db_insert,
